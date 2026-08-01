@@ -1,0 +1,8 @@
+{
+  "name": "Turf War: City of Crime",
+  "description": "A real-time multiplayer territory control game with a gritty, neon-lit urban crime theme built with React and Firestore.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- PLAYERS COLLECTION ---
+    match /players/{playerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() 
+        && request.auth.uid == playerId
+        && isValidPlayer(request.resource.data);
+      allow update: if isSignedIn() 
+        && request.auth.uid == playerId
+        && isValidPlayer(request.resource.data)
+        && (
+          // Allow updating cash and muscle
+          request.resource.data.diff(resource.data).affectedKeys().hasAny(['cash', 'muscle'])
+        );
+      allow delete: if false; // Cannot delete players
+    }
+
+    function isValidPlayer(data) {
+      return data.keys().hasAll(['color', 'cash', 'muscle']) 
+        && data.keys().size() == 3
+        && data.color is string 
+        && data.color.size() == 7
+        && data.color.matches('^#[0-9a-fA-F]{6}$')
+        && data.cash is number 
+        && data.cash >= 0
+        && data.muscle is number 
+        && data.muscle >= 0;
+    }
+
+    // --- DISTRICTS COLLECTION ---
+    match /districts/{districtId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn()
+        && isValidId(districtId)
+        && isValidDistrict(request.resource.data);
+    }
+
+    function isValidDistrict(data) {
+      return data.keys().hasAll(['ownerId', 'color'])
+        && data.keys().size() == 2
+        // ownerId can be empty string if owned by neutral/none
+        && data.ownerId is string
+        && data.ownerId.size() <= 128
+        && data.color is string
+        && data.color.size() == 7
+        && data.color.matches('^#[0-9a-fA-F]{6}$');
+    }
+  }
+}

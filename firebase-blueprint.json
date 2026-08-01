@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "Player": {
+      "title": "Player",
+      "description": "Represents a crime boss tracking cash, muscle representation, and color code.",
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string",
+          "description": "The custom neon color hex assigned to this boss"
+        },
+        "cash": {
+          "type": "number",
+          "description": "Available dirty cash to hire muscle"
+        },
+        "muscle": {
+          "type": "number",
+          "description": "Strength count / actions available to take territories"
+        }
+      },
+      "required": ["color", "cash", "muscle"]
+    },
+    "District": {
+      "title": "District",
+      "description": "Represents a single map cell in the turf war CSS Grid.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "The Player ID of the current boss ruling this district, or empty string if unowned"
+        },
+        "color": {
+          "type": "string",
+          "description": "The neon color hex representing the owning player, or grey if neutral"
+        }
+      },
+      "required": ["ownerId", "color"]
+    }
+  },
+  "firestore": {
+    "/players/{playerId}": {
+      "schema": "Player",
+      "description": "Active crime bosses in the city"
+    },
+    "/districts/{districtId}": {
+      "schema": "District",
+      "description": "Districts on the 10x10 Turf War grid"
+    }
+  }
+}
